@@ -14,10 +14,10 @@ class Graph:
     def from_lines(cls, lines: Iterator[str]) -> List["Graph"]:
         graphs = []
         while True:
-            try:
-                num_nodes, num_edges = next(lines).split()
-                num_nodes, num_edges = int(num_nodes), int(num_edges)
-            except StopIteration:
+            num_nodes, num_edges = next(lines).split()
+            num_nodes, num_edges = int(num_nodes), int(num_edges)
+
+            if num_nodes == 0 and num_edges == 0:
                 break
 
             edges = []
