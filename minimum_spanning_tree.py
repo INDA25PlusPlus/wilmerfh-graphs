@@ -29,11 +29,14 @@ class Graph:
 
         return graphs
 
+    @classmethod
+    def from_file(cls, path: str) -> List["Graph"]:
+        with open(path, "r") as f:
+            return cls.from_lines(f)
+
 
 def main():
-    with open("input.txt", "r") as f:
-        graphs = Graph.from_lines(f)
-
+    graphs = Graph.from_file("input.txt")
     for graph in graphs:
         print(
             f"Number of Nodes: {graph.num_nodes}, Number of Edges: {len(graph.edges)}"
