@@ -11,23 +11,33 @@ class Graph:
         self.num_nodes, self.edges = num_nodes, edges
 
     @classmethod
-    def from_lines(cls, lines: Iterator[str]) -> "Graph":
-        num_nodes, num_edges = next(lines).split()
-        num_nodes, num_edges = int(num_nodes), int(num_edges)
+    def from_lines(cls, lines: Iterator[str]) -> List["Graph"]:
+        graphs = []
+        while True:
+            try:
+                num_nodes, num_edges = next(lines).split()
+                num_nodes, num_edges = int(num_nodes), int(num_edges)
+            except StopIteration:
+                break
 
-        edges = []
-        for _ in range(num_edges):
-            a, b, w = next(lines).split()
-            edges.append(Edge(int(a), int(b), int(w)))
+            edges = []
+            for _ in range(num_edges):
+                a, b, w = next(lines).split()
+                edges.append(Edge(int(a), int(b), int(w)))
 
-        return cls(num_nodes, edges)
+            graphs.append(cls(num_nodes, edges))
+
+        return graphs
 
 
 def main():
     with open("input.txt", "r") as f:
-        graph = Graph.from_lines(f)
+        graphs = Graph.from_lines(f)
 
-    print(f"Number of Nodes: {graph.num_nodes}, Number of Edges: {len(graph.edges)}")
+    for graph in graphs:
+        print(
+            f"Number of Nodes: {graph.num_nodes}, Number of Edges: {len(graph.edges)}"
+        )
 
 
 if __name__ == "__main__":
