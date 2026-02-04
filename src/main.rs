@@ -30,7 +30,7 @@ impl UnionFind {
 struct Edge {
     a: usize,
     b: usize,
-    weight: u32,
+    weight: i32,
 }
 
 impl fmt::Display for Edge {
