@@ -33,15 +33,27 @@ struct Edge {
     weight: i32,
 }
 
-impl fmt::Display for Edge {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "  {} -- {} : {}", self.a, self.b, self.weight)
+impl Edge {
+    fn new(a: usize, b: usize, weight: i32) -> Self {
+        let mut edge = Edge { a, b, weight };
+        edge.normalize();
+        edge
+    }
+
+    fn normalize(&mut self) {
+        if self.b < self.a {
+            (self.a, self.b) = (self.b, self.a);
+        }
+    }
+
+    fn output_format(&self) -> String {
+        format!("{} {}", self.a, self.b)
     }
 }
 
-impl Edge {
-    fn output_format(&self) -> String {
-        format!("{} {}", self.a, self.b)
+impl fmt::Display for Edge {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "  {} -- {} : {}", self.a, self.b, self.weight)
     }
 }
 
@@ -51,11 +63,8 @@ struct Graph {
 }
 
 impl Graph {
-    fn new(num_nodes: u16, nodes: Vec<Edge>) -> Self {
-        let mut graph = Graph {
-            num_nodes,
-            edges: nodes,
-        };
+    fn new(num_nodes: u16, edges: Vec<Edge>) -> Self {
+        let mut graph = Graph { num_nodes, edges };
         graph.sort_edges();
         graph
     }
@@ -78,10 +87,10 @@ impl Graph {
         for _ in 0..num_edges {
             let line = lines.next()?;
             let mut parts = line.split_whitespace();
-            let a = parts.next()?.parse().unwrap();
-            let b = parts.next()?.parse().unwrap();
-            let weight = parts.next()?.parse().unwrap();
-            edges.push(Edge { a, b, weight });
+            let a: usize = parts.next()?.parse().unwrap();
+            let b: usize = parts.next()?.parse().unwrap();
+            let weight: i32 = parts.next()?.parse().unwrap();
+            edges.push(Edge::new(a, b, weight));
         }
         Some(Graph::new(num_nodes, edges))
     }
@@ -115,13 +124,13 @@ impl Graph {
         }
     }
 
-    fn total_cost(&self) -> u32 {
+    fn total_cost(&self) -> i32 {
         self.edges.iter().map(|e| e.weight).sum()
     }
 
     fn output_format(&self) -> String {
         let mut sorted_edges = self.edges.clone();
-        sorted_edges.sort_by_key(|e| e.a);
+        sorted_edges.sort_by_key(|e| (e.a, e.b));
 
         let mut result = format!("{}\n", self.total_cost());
         for edge in sorted_edges {
