@@ -69,6 +69,10 @@ impl Graph {
         let num_nodes = num_nodes.parse().unwrap();
         let num_edges = num_edges.parse().unwrap();
 
+        if num_nodes == 0 && num_edges == 0 {
+            return None;
+        }
+
         let mut edges = Vec::new();
 
         for _ in 0..num_edges {
@@ -146,11 +150,19 @@ impl fmt::Display for Graph {
 fn main() {
     let content = std::fs::read_to_string("input.txt").unwrap();
     let mut lines = content.lines().map(String::from);
-    if let Some(graph) = Graph::from_lines(&mut lines) {
-        if let Some(mst) = graph.mst() {
-            print!("{}", mst.output_format());
-        } else {
-            println!("Impossible");
+    let mut graphs = Vec::new();
+
+    loop {
+        match Graph::from_lines(&mut lines) {
+            Some(graph) => graphs.push(graph),
+            None => break,
+        }
+    }
+
+    for graph in graphs {
+        match graph.mst() {
+            Some(mst) => print!("{}", mst.output_format()),
+            None => println!("Impossible"),
         }
     }
 }
