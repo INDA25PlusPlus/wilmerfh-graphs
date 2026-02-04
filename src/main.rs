@@ -157,7 +157,7 @@ impl fmt::Display for Graph {
 }
 
 fn main() {
-    let content = std::fs::read_to_string("input.txt").unwrap();
+    let content = std::io::read_to_string(std::io::stdin()).unwrap();
     let mut lines = content.lines().map(String::from);
     let mut graphs = Vec::new();
 
