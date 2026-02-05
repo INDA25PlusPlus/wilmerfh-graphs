@@ -1,3 +1,5 @@
+// Kattis submission: https://kth.kattis.com/courses/DD2016/plusplus24/assignments/j8fgxh/submissions/19117808
+
 use std::fmt;
 
 struct Graph {

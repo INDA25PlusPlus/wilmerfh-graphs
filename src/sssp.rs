@@ -1,3 +1,5 @@
+// Kattis submission: https://kth.kattis.com/courses/DD2016/plusplus24/assignments/j8fgxh/submissions/19117229
+
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
 use std::fmt;
