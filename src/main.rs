@@ -1,0 +1,96 @@
+use std::fmt;
+
+struct Graph {
+    num_nodes: usize,
+    neighbor_matrix: Vec<Vec<i64>>,
+}
+
+impl Graph {
+    fn new(num_nodes: usize, neighbor_matrix: Vec<Vec<i64>>) -> Self {
+        Self {
+            num_nodes,
+            neighbor_matrix,
+        }
+    }
+}
+
+impl fmt::Display for Graph {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "Graph with {} nodes", self.num_nodes)
+    }
+}
+
+struct Query {
+    u: usize,
+    v: usize,
+}
+
+struct TestCase {
+    graph: Graph,
+    queries: Vec<Query>,
+}
+
+impl TestCase {
+    fn new(graph: Graph, queries: Vec<Query>) -> Self {
+        Self { graph, queries }
+    }
+
+    fn from_lines<I>(lines: &mut I) -> Option<Self>
+    where
+        I: Iterator<Item = String>,
+    {
+        let first_line = lines.next()?;
+        let mut parts = first_line.split_whitespace();
+        let num_nodes: usize = parts.next()?.parse().unwrap();
+        let num_edges: usize = parts.next()?.parse().unwrap();
+        let num_queries: usize = parts.next()?.parse().unwrap();
+
+        if num_nodes == 0 && num_edges == 0 && num_queries == 0 {
+            return None;
+        }
+
+        let mut neighbor_matrix = vec![vec![i64::MAX / 2; num_nodes]; num_nodes];
+        for i in 0..num_nodes {
+            neighbor_matrix[i][i] = 0;
+        }
+
+        for _ in 0..num_edges {
+            let line = lines.next()?;
+            let mut parts = line.split_whitespace();
+            let u: usize = parts.next()?.parse().unwrap();
+            let v: usize = parts.next()?.parse().unwrap();
+            let w: i64 = parts.next()?.parse().unwrap();
+            if w < neighbor_matrix[u][v] {
+                neighbor_matrix[u][v] = w;
+            }
+        }
+        let graph = Graph::new(num_nodes, neighbor_matrix);
+
+        let mut queries = Vec::new();
+        for _ in 0..num_queries {
+            let line = lines.next()?;
+            let mut parts = line.split_whitespace();
+            let u: usize = parts.next()?.parse().unwrap();
+            let v: usize = parts.next()?.parse().unwrap();
+            queries.push(Query { u, v });
+        }
+
+        Some(TestCase::new(graph, queries))
+    }
+}
+
+impl fmt::Display for TestCase {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "Test Case:")?;
+        write!(f, "{}", self.graph)?;
+        writeln!(f, "  Queries: {:?}", self.queries.len())
+    }
+}
+
+fn main() {
+    let content = std::fs::read_to_string("apsp_input.txt").unwrap();
+    let mut lines = content.lines().map(String::from);
+
+    let test_case = TestCase::from_lines(&mut lines).unwrap();
+    println!("{}", test_case);
+}
