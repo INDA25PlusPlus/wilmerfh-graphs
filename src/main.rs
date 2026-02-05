@@ -1,3 +1,5 @@
+use std::cmp::Reverse;
+use std::collections::BinaryHeap;
 use std::fmt;
 
 struct Edge {
@@ -33,36 +35,30 @@ impl Graph {
     fn shortest_path(&self, start_node: u16, end_node: u16) -> Option<u32> {
         // Dijkstras Algorithm
         let mut distances = vec![u32::MAX; self.num_nodes as usize];
-        let mut visited = vec![false; self.num_nodes as usize];
+        let mut heap = BinaryHeap::new();
+
         distances[start_node as usize] = 0;
+        heap.push(Reverse((0u32, start_node)));
 
-        let closest_unvisited = |distances: &[u32], visited: &[bool]| {
-            let mut result = None;
-            let mut min_distance = u32::MAX;
-            for i in 0..visited.len() {
-                if !visited[i] && distances[i] < min_distance {
-                    min_distance = distances[i];
-                    result = Some(i);
-                }
-            }
-            result
-        };
-
-        loop {
-            let current = closest_unvisited(&distances, &visited)?;
-            visited[current] = true;
-
-            if current == end_node as usize {
-                return Some(distances[current]);
+        while let Some(Reverse((dist, node))) = heap.pop() {
+            if node == end_node {
+                return Some(dist);
             }
 
-            for neighbor in &self.neighbors_list[current] {
-                let new_distance = distances[current].saturating_add(neighbor.weight as u32);
+            if dist > distances[node as usize] {
+                continue;
+            }
+
+            for neighbor in &self.neighbors_list[node as usize] {
+                let new_distance = dist.saturating_add(neighbor.weight as u32);
                 if new_distance < distances[neighbor.node as usize] {
                     distances[neighbor.node as usize] = new_distance;
+                    heap.push(Reverse((new_distance, neighbor.node)));
                 }
             }
         }
+
+        None
     }
 }
 
