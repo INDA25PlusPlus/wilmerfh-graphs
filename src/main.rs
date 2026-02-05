@@ -80,6 +80,20 @@ impl TestCase {
         Self { graph, queries }
     }
 
+    fn output_format(&self) -> String {
+        let distance = self.graph.floyd_warshall();
+        let mut result = String::new();
+        for query in &self.queries {
+            let line = match self.graph.shortest_path(&distance, query.u, query.v) {
+                ShortestPathResult::Distance(d) => format!("{}", d),
+                ShortestPathResult::Impossible => "Impossible".to_string(),
+                ShortestPathResult::NegativeInfinity => "-Infinity".to_string(),
+            };
+            result.push_str(&format!("{}\n", line));
+        }
+        result
+    }
+
     fn from_lines<I>(lines: &mut I) -> Option<Self>
     where
         I: Iterator<Item = String>,
@@ -133,14 +147,18 @@ impl fmt::Display for TestCase {
 }
 
 fn main() {
-    let content = std::fs::read_to_string("apsp_input.txt").unwrap();
+    let content = std::io::read_to_string(std::io::stdin()).unwrap();
     let mut lines = content.lines().map(String::from);
+    let mut test_cases = Vec::new();
 
-    let test_case = TestCase::from_lines(&mut lines).unwrap();
-    let distance = test_case.graph.floyd_warshall();
+    loop {
+        match TestCase::from_lines(&mut lines) {
+            Some(test_case) => test_cases.push(test_case),
+            None => break,
+        }
+    }
 
-    for query in &test_case.queries {
-        let result = test_case.graph.shortest_path(&distance, query.u, query.v);
-        println!("{}", result);
+    for test_case in test_cases {
+        print!("{}\n", test_case.output_format());
     }
 }
