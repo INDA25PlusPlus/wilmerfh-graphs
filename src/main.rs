@@ -12,6 +12,51 @@ impl Graph {
             neighbor_matrix,
         }
     }
+
+    fn floyd_warshall(&self) -> Vec<Vec<i64>> {
+        let n = self.num_nodes;
+        let mut distance = self.neighbor_matrix.clone();
+
+        for k in 0..n {
+            for a in 0..n {
+                for b in 0..n {
+                    distance[a][b] = distance[a][b].min(distance[a][k] + distance[k][b]);
+                }
+            }
+        }
+
+        distance
+    }
+
+    fn shortest_path(&self, distance: &Vec<Vec<i64>>, u: usize, v: usize) -> ShortestPathResult {
+        if distance[u][v] >= i64::MAX / 2 {
+            return ShortestPathResult::Impossible;
+        }
+
+        for k in 0..self.num_nodes {
+            if distance[k][k] < 0 && distance[u][k] < i64::MAX / 2 && distance[k][v] < i64::MAX / 2 {
+                return ShortestPathResult::NegativeInfinity;
+            }
+        }
+
+        ShortestPathResult::Distance(distance[u][v])
+    }
+}
+
+enum ShortestPathResult {
+    Distance(i64),
+    Impossible,
+    NegativeInfinity,
+}
+
+impl fmt::Display for ShortestPathResult {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            ShortestPathResult::Distance(d) => write!(f, "{}", d),
+            ShortestPathResult::Impossible => write!(f, "Impossible"),
+            ShortestPathResult::NegativeInfinity => write!(f, "-Infinity"),
+        }
+    }
 }
 
 impl fmt::Display for Graph {
@@ -92,5 +137,10 @@ fn main() {
     let mut lines = content.lines().map(String::from);
 
     let test_case = TestCase::from_lines(&mut lines).unwrap();
-    println!("{}", test_case);
+    let distance = test_case.graph.floyd_warshall();
+
+    for query in &test_case.queries {
+        let result = test_case.graph.shortest_path(&distance, query.u, query.v);
+        println!("{}", result);
+    }
 }
