@@ -29,6 +29,41 @@ impl Graph {
             neighbors_list,
         }
     }
+
+    fn shortest_path(&self, start_node: u16, end_node: u16) -> Option<u32> {
+        // Dijkstras Algorithm
+        let mut distances = vec![u32::MAX; self.num_nodes as usize];
+        let mut visited = vec![false; self.num_nodes as usize];
+        distances[start_node as usize] = 0;
+
+        let closest_unvisited = |distances: &[u32], visited: &[bool]| {
+            let mut result = None;
+            let mut min_distance = u32::MAX;
+            for i in 0..visited.len() {
+                if !visited[i] && distances[i] < min_distance {
+                    min_distance = distances[i];
+                    result = Some(i);
+                }
+            }
+            result
+        };
+
+        loop {
+            let current = closest_unvisited(&distances, &visited)?;
+            visited[current] = true;
+
+            if current == end_node as usize {
+                return Some(distances[current]);
+            }
+
+            for neighbor in &self.neighbors_list[current] {
+                let new_distance = distances[current].saturating_add(neighbor.weight as u32);
+                if new_distance < distances[neighbor.node as usize] {
+                    distances[neighbor.node as usize] = new_distance;
+                }
+            }
+        }
+    }
 }
 
 impl fmt::Display for Graph {
@@ -128,5 +163,10 @@ fn main() {
     let mut lines = content.lines().map(String::from);
 
     let test_case = TestCase::from_lines(&mut lines).unwrap();
-    println!("{}", test_case);
+
+    for query in &test_case.queries {
+        if let Some(distance) = test_case.graph.shortest_path(test_case.start_node, *query) {
+            println!("{}", distance);
+        }
+    }
 }
