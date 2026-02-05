@@ -1,44 +1,50 @@
 use std::fmt;
 
 struct Edge {
-    a: usize,
-    b: usize,
+    a: u16,
+    b: u16,
     weight: u16,
 }
 
 impl Edge {
-    fn new(a: usize, b: usize, weight: u16) -> Self {
+    fn new(a: u16, b: u16, weight: u16) -> Self {
         Self { a, b, weight }
     }
 }
 
-impl fmt::Display for Edge {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "  {} -- {} : {}", self.a, self.b, self.weight)
-    }
+struct Neighbor {
+    node: u16,
+    weight: u16,
 }
 
 struct Graph {
     num_nodes: u16,
-    edges: Vec<Edge>,
+    neighbors_list: Vec<Vec<Neighbor>>,
 }
 
 impl Graph {
-    fn new(num_nodes: u16, edges: Vec<Edge>) -> Self {
-        Self { num_nodes, edges }
+    fn new(num_nodes: u16, neighbors_list: Vec<Vec<Neighbor>>) -> Self {
+        Self {
+            num_nodes,
+            neighbors_list,
+        }
     }
 }
 
 impl fmt::Display for Graph {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(
-            f,
-            "Graph with {} nodes and {} edges:",
-            self.num_nodes,
-            self.edges.len()
-        )?;
-        for edge in &self.edges {
-            writeln!(f, "{}", edge)?;
+        writeln!(f, "Graph with {} nodes:", self.num_nodes)?;
+        for (node, neighbors) in self.neighbors_list.iter().enumerate() {
+            if !neighbors.is_empty() {
+                write!(f, "  Node {}: ", node)?;
+                for (i, neighbor) in neighbors.iter().enumerate() {
+                    if i > 0 {
+                        write!(f, ", ")?;
+                    }
+                    write!(f, "{} (weight: {})", neighbor.node, neighbor.weight)?;
+                }
+                writeln!(f)?;
+            }
         }
         Ok(())
     }
@@ -86,7 +92,16 @@ impl TestCase {
             let edge = Edge::new(u, v, w);
             edges.push(edge);
         }
-        let graph = Graph::new(num_nodes, edges);
+
+        let mut neighbors_list: Vec<Vec<Neighbor>> = (0..num_nodes).map(|_| Vec::new()).collect();
+        for edge in &edges {
+            neighbors_list[edge.a as usize].push(Neighbor {
+                node: edge.b,
+                weight: edge.weight,
+            });
+        }
+
+        let graph = Graph::new(num_nodes, neighbors_list);
 
         let mut queries = Vec::new();
         for _ in 0..num_queries {
