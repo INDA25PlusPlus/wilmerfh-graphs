@@ -16,11 +16,14 @@ impl Graph {
     fn floyd_warshall(&self) -> Vec<Vec<i64>> {
         let n = self.num_nodes;
         let mut distance = self.neighbor_matrix.clone();
+        let inf = i64::MAX / 2;
 
         for k in 0..n {
             for a in 0..n {
                 for b in 0..n {
-                    distance[a][b] = distance[a][b].min(distance[a][k] + distance[k][b]);
+                    if distance[a][k] < inf && distance[k][b] < inf {
+                        distance[a][b] = distance[a][b].min(distance[a][k] + distance[k][b]);
+                    }
                 }
             }
         }
@@ -34,7 +37,8 @@ impl Graph {
         }
 
         for k in 0..self.num_nodes {
-            if distance[k][k] < 0 && distance[u][k] < i64::MAX / 2 && distance[k][v] < i64::MAX / 2 {
+            if distance[k][k] < 0 && distance[u][k] < i64::MAX / 2 && distance[k][v] < i64::MAX / 2
+            {
                 return ShortestPathResult::NegativeInfinity;
             }
         }
