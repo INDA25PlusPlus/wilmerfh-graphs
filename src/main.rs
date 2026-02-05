@@ -149,6 +149,19 @@ impl TestCase {
     }
 }
 
+impl TestCase {
+    fn output_format(&self) -> String {
+        let mut result = String::new();
+        for query in &self.queries {
+            match self.graph.shortest_path(self.start_node, *query) {
+                Some(distance) => result.push_str(&format!("{}\n", distance)),
+                None => result.push_str("Impossible\n"),
+            }
+        }
+        result
+    }
+}
+
 impl fmt::Display for TestCase {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "Test Case:")?;
@@ -159,14 +172,18 @@ impl fmt::Display for TestCase {
 }
 
 fn main() {
-    let content = std::fs::read_to_string("sssp_input.txt").unwrap();
+    let content = std::io::read_to_string(std::io::stdin()).unwrap();
     let mut lines = content.lines().map(String::from);
+    let mut test_cases = Vec::new();
 
-    let test_case = TestCase::from_lines(&mut lines).unwrap();
-
-    for query in &test_case.queries {
-        if let Some(distance) = test_case.graph.shortest_path(test_case.start_node, *query) {
-            println!("{}", distance);
+    loop {
+        match TestCase::from_lines(&mut lines) {
+            Some(test_case) => test_cases.push(test_case),
+            None => break,
         }
+    }
+
+    for test_case in test_cases {
+        print!("{}", test_case.output_format());
     }
 }
